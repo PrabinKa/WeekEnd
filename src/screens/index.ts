@@ -5,6 +5,7 @@ import MovieCrousel from "./carousel/MovieCrousel";
 import DetailedMovieScreen from "./movie-detail/DetailedMovieScreen";
 import DiceRoller from "./dice/DiceRoller";
 import HomeScreen from "./home/HomeScreen";
+import UsersList from "./users/UsersList";
 
 export {
     LoginScreen,
@@ -13,5 +14,6 @@ export {
     MovieCrousel,
     DetailedMovieScreen,
     DiceRoller,
-    HomeScreen
+    HomeScreen,
+    UsersList
 }

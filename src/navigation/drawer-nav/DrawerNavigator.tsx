@@ -5,7 +5,7 @@ import {
   DrawerContentScrollView,
 } from '@react-navigation/drawer';
 import BottomTabNav from '../bottom-tab/BottomTabNav';
-import {ProfileScreen} from '../../screens';
+import {ProfileScreen, UsersList} from '../../screens';
 import {
   COLORS,
   DRAWER_ICONS,
@@ -108,7 +108,11 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
             </Text>
             <Text
               numberOfLines={1}
-              style={{color: 'white', fontWeight: 'bold', fontSize: fontPixel(14)}}>
+              style={{
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: fontPixel(14),
+              }}>
               Prabinkarki4296@gmail.com
             </Text>
           </View>
@@ -130,6 +134,15 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
             onPress={() => {
               setSelectedTab(DRAWER_SCREENS.profile);
               navigation.navigate('Profile');
+            }}
+          />
+          <CustomDrawerItem
+            label={DRAWER_SCREENS.users}
+            icon={DRAWER_ICONS.users}
+            isFocused={selectedTab == DRAWER_SCREENS.users}
+            onPress={() => {
+              setSelectedTab(DRAWER_SCREENS.users);
+              navigation.navigate('Users List');
             }}
           />
         </View>
@@ -168,6 +181,9 @@ const DrawerNavigator = () => {
         </Drawer.Screen>
         <Drawer.Screen name="Profile">
           {props => <ProfileScreen {...props} />}
+        </Drawer.Screen>
+        <Drawer.Screen name="Users List">
+          {props => <UsersList {...props} />}
         </Drawer.Screen>
       </Drawer.Navigator>
     </View>

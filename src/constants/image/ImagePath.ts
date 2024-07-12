@@ -6,5 +6,6 @@ export const IMAGE_PATH = {
     PREVIOUS: require('../../assets/previous.png'),
     HOME: require('../../assets/home.png'),
     USER: require('../../assets/user.png'),
-    LOGOUT: require('../../assets/out.png')
+    LOGOUT: require('../../assets/out.png'),
+    USERS: require('../../assets/group.png')
 }

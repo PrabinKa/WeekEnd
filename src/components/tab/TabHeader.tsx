@@ -28,7 +28,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({children, navigation}) => {
   const route = useRoute();
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex: 1}} >
       <View style={container}>
         <TouchableOpacity
           activeOpacity={0.5}

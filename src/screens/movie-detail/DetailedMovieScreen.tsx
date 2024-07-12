@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -57,6 +57,7 @@ const DetailedMovieScreen: React.FC<DetailedMovieScreenProps> = ({
       </TouchableOpacity>
     );
   };
+
 
   return (
     <SafeAreaView style={container}>
