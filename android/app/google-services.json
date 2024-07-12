@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "960758974085",
+    "project_id": "weekend-90831",
+    "storage_bucket": "weekend-90831.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:960758974085:android:655afa105768293f844bec",
+        "android_client_info": {
+          "package_name": "com.weekend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQbghL5FZEvHNytmWBRoaII1fke5L36K8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
