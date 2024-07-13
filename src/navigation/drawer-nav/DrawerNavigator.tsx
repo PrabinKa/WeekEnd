@@ -1,5 +1,12 @@
-import React, {useState} from 'react';
-import {Image, ImageProps, Text, TouchableOpacity, View} from 'react-native';
+import React, {useState, useContext} from 'react';
+import {
+  Image,
+  ImageProps,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert,
+} from 'react-native';
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -16,6 +23,7 @@ import {
   pixelSizeHorizontal,
   pixelSizeVertical,
 } from '../../constants';
+import {AppContext} from '../../context/AppContext';
 
 const Drawer = createDrawerNavigator();
 
@@ -75,6 +83,17 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
   navigation,
 }) => {
   const [selectedTab, setSelectedTab] = useState('Home');
+  const {tokenHandler} = useContext(AppContext);
+
+  const logoutHanlder = () => {
+    Alert.alert('logout', 'You want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {text: 'OK', onPress: () => tokenHandler('')},
+    ]);
+  };
 
   return (
     <DrawerContentScrollView
@@ -150,7 +169,9 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
           <CustomDrawerItem
             label={DRAWER_SCREENS.logout}
             icon={DRAWER_ICONS.logout}
-            onPress={() => {}}
+            onPress={() => {
+              logoutHanlder();
+            }}
           />
         </View>
       </View>

@@ -1,5 +1,9 @@
 import { getMovies } from "./movie/Movies";
+import { login, fetchCurrentUser, refreshAccessToken } from "./auth/AuthService";
 
 export {
-    getMovies
+    getMovies,
+    login,
+    fetchCurrentUser,
+    refreshAccessToken
 }

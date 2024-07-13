@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import {
   StyleSheet,
   Text,
@@ -19,6 +19,12 @@ import {
 } from '../../constants';
 import {RouteProp} from '@react-navigation/native';
 import {ParamListBase} from '@react-navigation/routers';
+import {refreshAccessToken} from '../../services/auth/AuthService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {decryptData} from '../../utils/encryption/Encryption';
+import {getRefreshToken} from '../../utils';
+import {fetchCurrentUser} from '../../services/auth/AuthService';
+import {AppContext} from '../../context/AppContext';
 
 type ProfileScreenProps = {
   route: RouteProp<ParamListBase, 'Profile'>;
@@ -41,19 +47,65 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({navigation}) => {
   const phoneRef = useRef<TextInputType>(null);
   const webRef = useRef<TextInputType>(null);
   const passwordRef = useRef<TextInputType>(null);
+  const {token} = useContext(AppContext);
+  const [currentUser, setCurrentUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    profileImage: '',
+    phone: '',
+  });
+
+  console.log(currentUser);
 
   const hanldePasswordSecureText = () => {
     setSecureTextEntry(!secureTextEntry);
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        if (token) {
+          const user = await fetchCurrentUser(token);
+          if (user) {
+            const {email, firstName, lastName, password, phone, image} = user;
+            setCurrentUser({
+              ...currentUser,
+              email,
+              firstName,
+              lastName,
+              password,
+              phone,
+              profileImage: image,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+    fetchUser();
+  }, [token]);
 
   return (
     <TabHeader navigation={navigation}>
       <View style={container}>
         <View style={userImageWrapper}>
           <View style={profileWrapper}>
-            <Image source={IMAGE_PATH.PROFILE} style={imageStyles} />
+            {currentUser.profileImage ? (
+              <Image
+                source={{uri: currentUser.profileImage}}
+                style={imageStyles}
+              />
+            ) : (
+              <Image source={IMAGE_PATH.PROFILE} style={imageStyles} />
+            )}
           </View>
-          <Text style={userNameText}>Prabin Karki</Text>
+          <Text
+            style={
+              userNameText
+            }>{`${currentUser?.firstName} ${currentUser?.lastName}`}</Text>
           <Text style={designationText}>React Native</Text>
         </View>
         <View style={{paddingVertical: pixelSizeVertical(20)}}>
@@ -63,6 +115,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({navigation}) => {
               inputRef={emailRef}
               placeholder="xxx@gmail.com"
               icon="mail"
+              value={currentUser?.email}
               blurOnSubmit={false}
               returnKeyType="next"
               placeholderTextColor={COLORS.PRIMARY}
@@ -81,6 +134,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({navigation}) => {
               inputRef={phoneRef}
               placeholder="9811....."
               icon="phone-portrait-outline"
+              value={currentUser?.phone}
               blurOnSubmit={false}
               returnKeyType="next"
               placeholderTextColor={COLORS.PRIMARY}
@@ -117,6 +171,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({navigation}) => {
               placeholder="xxxxxxxx"
               returnKeyType="done"
               icon="lock-closed"
+              value={currentUser?.password}
               placeholderTextColor={COLORS.PRIMARY}
               selectionColor={COLORS.PRIMARY}
               containerStyle={{marginTop: pixelSizeVertical(10)}}

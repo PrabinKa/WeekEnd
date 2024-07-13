@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useContext} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -18,7 +18,24 @@ import {
   STRINGS,
   IMAGE_PATH,
 } from '../../constants';
-import {UserInputs, PlainButton, CustomButtonIcon} from '../../components';
+import {
+  UserInputs,
+  PlainButton,
+  CustomButtonIcon,
+  Loader,
+  ErrorMessage,
+} from '../../components';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
+import {login} from '../../services';
+import {AppContext} from '../../context/AppContext';
+import {encryptData} from '../../utils/encryption/Encryption';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+GoogleSignin.configure({
+  webClientId:
+    '960758974085-vcvj2edd4lpju7qtdute77m56ho3ho7t.apps.googleusercontent.com',
+});
 
 const LoginScreen = () => {
   const {
@@ -38,14 +55,70 @@ const LoginScreen = () => {
   const usernameRef = useRef<TextInputType>(null);
   const passwordRef = useRef<TextInputType>(null);
   const [secureTextEntry, setSecureTextEntry] = useState<boolean>(true);
+  const {tokenHandler} = useContext(AppContext);
 
   const [loginCredentials, setLoginCredentials] = useState({
     username: '',
     password: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isErrorVisible, setIsErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handlePasswordSecureText = () => {
     setSecureTextEntry(!secureTextEntry);
+  };
+
+  const onGoogleButtonPressed = async () => {
+    try {
+      // Check if your device supports Google Play
+      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+
+      // Get the users ID token
+      const {idToken} = await GoogleSignin.signIn();
+
+      console.log('google token', idToken);
+
+      // Create a Google credential with the token
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+      console.log('google credentials', googleCredential);
+    } catch (error) {
+      console.log('google signin', error);
+    }
+  };
+
+  const loginHandler = async () => {
+    const {username, password} = loginCredentials;
+
+    setIsLoading(true);
+
+    try {
+      await login(username, password).then(async response => {
+        if (response.data) {
+          const {token, refreshToken} = response.data;
+          tokenHandler(token);
+
+          const encryptedRefreshToken = encryptData(
+            refreshToken,
+            'refresh_token',
+          );
+
+          await AsyncStorage.setItem('refresh_token', encryptedRefreshToken);
+        }
+      });
+    } catch (error: any) {
+      const {message} = error.response.data;
+
+      setIsErrorVisible(true);
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleErrorModal = () => {
+    setIsErrorVisible(!isErrorVisible);
   };
 
   return (
@@ -101,12 +174,15 @@ const LoginScreen = () => {
           textStyle={{
             color: COLORS.WHITE,
           }}
-          onPress={() => {}}>
+          onPress={() => {
+            loginHandler();
+          }}>
           {STRINGS.SIGN_IN}
         </PlainButton>
         <Text style={orLoginText}>{STRINGS.OR_LOGIN}</Text>
         <View style={buttonsWrapper}>
           <CustomButtonIcon
+            onPress={onGoogleButtonPressed}
             icon={IMAGE_PATH.GOOGLE}
             containerStyle={{
               backgroundColor: COLORS.WHITE,
@@ -136,6 +212,12 @@ const LoginScreen = () => {
           </Pressable>
         </View>
       </View>
+      <Loader isLoading={isLoading} />
+      <ErrorMessage
+        isVisible={isErrorVisible}
+        message={errorMessage}
+        onClose={toggleErrorModal}
+      />
     </SafeAreaView>
   );
 };
@@ -194,7 +276,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: pixelSizeVertical(50)
+    marginTop: pixelSizeVertical(50),
   },
   haveAccountText: {
     fontSize: fontPixel(18),

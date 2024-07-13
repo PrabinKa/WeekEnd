@@ -4,12 +4,15 @@ import {COLORS} from './src/constants';
 import RootNavigator from './src/navigation/root-nav/RootNavigator';
 import {store} from './src/redux/store';
 import {Provider} from 'react-redux';
+import ContextProvider from './src/context/AppContext';
 
 const App = () => {
   return (
     <Provider store={store}>
-      <StatusBar backgroundColor={COLORS.PRIMARY} />
-      <RootNavigator />
+      <ContextProvider>
+        <StatusBar backgroundColor={COLORS.PRIMARY} />
+        <RootNavigator />
+      </ContextProvider>
     </Provider>
   );
 };

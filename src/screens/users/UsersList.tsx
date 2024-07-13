@@ -36,8 +36,6 @@ const UsersList: React.FC<UserListProps> = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useAppDispatch();
 
-  console.log(status, error, usersCollection);
-
   useEffect(() => {
     if (status == 'idle') {
       dispatch(fetchUsers());
