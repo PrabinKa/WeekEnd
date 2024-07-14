@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import {
   Image,
   ImageProps,
@@ -24,6 +24,7 @@ import {
   pixelSizeVertical,
 } from '../../constants';
 import {AppContext} from '../../context/AppContext';
+import {fetchCurrentUser} from '../../services';
 
 const Drawer = createDrawerNavigator();
 
@@ -83,7 +84,15 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
   navigation,
 }) => {
   const [selectedTab, setSelectedTab] = useState('Home');
-  const {tokenHandler} = useContext(AppContext);
+  const {token, tokenHandler} = useContext(AppContext);
+  const [currentUser, setCurrentUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    profileImage: '',
+    phone: '',
+  });
 
   const logoutHanlder = () => {
     Alert.alert('logout', 'You want to logout?', [
@@ -94,6 +103,32 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
       {text: 'OK', onPress: () => tokenHandler('')},
     ]);
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        if (token) {
+          const user = await fetchCurrentUser(token);
+          if (user) {
+            const {email, firstName, lastName, password, phone, image} = user;
+            setCurrentUser({
+              ...currentUser,
+              email,
+              firstName,
+              lastName,
+              password,
+              phone,
+              profileImage: image,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   return (
     <DrawerContentScrollView
@@ -106,15 +141,27 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
           paddingTop: pixelSizeVertical(10),
         }}>
         <View>
-          <Image
-            source={IMAGE_PATH.PROFILE}
-            resizeMode="contain"
-            style={{
-              width: heightPixel(80),
-              height: heightPixel(80),
-              borderRadius: 40,
-            }}
-          />
+          {currentUser.profileImage ? (
+            <Image
+              source={{uri: currentUser.profileImage}}
+              resizeMode="contain"
+              style={{
+                width: heightPixel(80),
+                height: heightPixel(80),
+                borderRadius: 40,
+              }}
+            />
+          ) : (
+            <Image
+              source={IMAGE_PATH.PROFILE}
+              resizeMode="contain"
+              style={{
+                width: heightPixel(80),
+                height: heightPixel(80),
+                borderRadius: 40,
+              }}
+            />
+          )}
           <View style={{marginLeft: 5, justifyContent: 'center'}}>
             <Text
               style={{
@@ -123,7 +170,7 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
                 fontSize: fontPixel(18),
                 marginTop: pixelSizeVertical(10),
               }}>
-              Prabin Karki
+              {`${currentUser?.firstName} ${currentUser?.lastName}`}
             </Text>
             <Text
               numberOfLines={1}
@@ -132,7 +179,7 @@ const CustomDrawerContent: React.FC<CustomDrawerContentProps> = ({
                 fontWeight: 'bold',
                 fontSize: fontPixel(14),
               }}>
-              Prabinkarki4296@gmail.com
+              {currentUser?.email}
             </Text>
           </View>
         </View>

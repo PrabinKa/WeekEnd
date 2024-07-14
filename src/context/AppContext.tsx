@@ -1,10 +1,11 @@
 import React, {createContext, ReactNode, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {encryptData} from '../utils/encryption/Encryption';
+import {decryptData, encryptData} from '../utils/encryption/Encryption';
 
 interface ContextProviderProps {
   children: ReactNode;
 }
+
 
 interface AppContextType {
   token: string | null;
@@ -32,6 +33,22 @@ const ContextProvider: React.FC<ContextProviderProps> = ({children}) => {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    isUserLoggedIn();
+  }, []);
+
+  const isUserLoggedIn = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (token) {
+        const decryptedAccessToken = decryptData(token, 'access_token');
+        setToken(decryptedAccessToken);
+      }
+    } catch (error) {
+      console.log('failed to retrieve access token', error);
     }
   };
 
